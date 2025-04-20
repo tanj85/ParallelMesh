@@ -10,7 +10,7 @@ using Grid = vector<vector<int>>;
 
 Grid generate_random_grid(int n, int k, unsigned seed) {
     mt19937 rng(seed);
-    uniform_int_distribution<int> dist(1, k);
+    uniform_int_distribution<int> dist(0, k-1);
     Grid grid(n, vector<int>(n));
     for (auto& row : grid)
         for (auto& cell : row)
@@ -20,7 +20,7 @@ Grid generate_random_grid(int n, int k, unsigned seed) {
 
 Grid generate_blocky_grid(int n, int k, int patch_size, unsigned seed) {
     mt19937 rng(seed);
-    uniform_int_distribution<int> color_dist(1, k);
+    uniform_int_distribution<int> color_dist(0, k-1);
     Grid grid(n, vector<int>(n, 0));
     vector<vector<bool>> visited(n, vector<bool>(n, false));
     int dx[] = {1, -1, 0, 0};
@@ -67,16 +67,25 @@ void save_grid(const Grid& grid, const string& filename) {
 }
 
 int main(int argc, char* argv[]) {
-    if (argc < 6) {
-        cerr << "Usage: " << argv[0] << " <n> <k> <mode: random|blocky> <seed> <output_file>\n";
+    if (argc < 5) {
+        cerr << "Usage: " << argv[0] << " <n> <k> <mode: random|blocky> [seed] <output_file>\n";
         return 1;
     }
 
     int n = stoi(argv[1]);
     int k = stoi(argv[2]);
     string mode = argv[3];
-    unsigned seed = static_cast<unsigned>(stoi(argv[4]));
-    string output_file = argv[5];
+    unsigned seed;
+    string output_file;
+
+    if (argc == 6) {
+        seed = static_cast<unsigned>(stoi(argv[4]));
+        output_file = argv[5];
+    } else {
+        seed = static_cast<unsigned>(time(nullptr));  // fallback to current time
+        output_file = argv[4];
+        cout << "Using default seed: " << seed << '\n';
+    }
 
     Grid grid;
     if (mode == "random")
